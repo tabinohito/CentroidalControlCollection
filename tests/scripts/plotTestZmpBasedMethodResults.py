@@ -2,6 +2,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import patches
 import math
 
 
@@ -86,10 +87,9 @@ class PlotTestZmpBasedMethodResults(object):
             ax.grid(axis="y")
 
         # Plot all time steps
-        # これ気づいたけどy座標だけは歩幅をたさなきゃいけないので、片脚支持期間の歩幅を足す必要がある
         width_= 0
         step_list = []
-        foot_step_list = [[0.2, 0.1],[0.4, -0.1],[0.6,0.1],[0.8,-0.1],[0.6,0.1],[0.6,-0.1]]
+        foot_step_list = [[0.0, -0.1],[0.0, 0.1],[0.2, 0.1],[0.4, -0.1],[0.6,0.1],[0.8,-0.1],[0.6,0.1],[0.6,-0.1]]
         select = lambda x: 'Right' if x % 2 == 0 else 'Left'
 
         #y軸オフセットを計算する
@@ -114,7 +114,15 @@ class PlotTestZmpBasedMethodResults(object):
 
                 # Setup subplot
                 subplot_args[2] = len(method_list) * len(axis_list) + plot_comp_time + 1
-                ax = self.fig.add_subplot(*subplot_args)                      
+                ax = self.fig.add_subplot(*subplot_args)
+
+                #Foot step
+                for i,j in foot_step_list:
+                    if j < 0:
+                        r = patches.Rectangle( xy=(i-0.05,j-0.1) , width=0.1, height=0.1)
+                    else:
+                        r = patches.Rectangle( xy=(i-0.05,j) , width=0.1, height=0.1)
+                    ax.add_patch(r)
 
                 ax.plot(result_data["planned_zmp_x"], self.offset(step_list,result_data["planned_zmp_y"]),
                         color="red", label="planned ZMP")
@@ -122,20 +130,20 @@ class PlotTestZmpBasedMethodResults(object):
                     ax.plot(result_data["ref_zmp_x"], self.offset(step_list,result_data["ref_zmp_y"]),
                             color="blue", linestyle="dashed", label="ref ZMP")
 
-                if "ref_zmp_min_x" in result_data.dtype.names and "ref_zmp_min_y" in result_data.dtype.names:
-                    ax.plot(result_data["ref_zmp_min_x"], self.offset(step_list,result_data["ref_zmp_min_y"]),
-                            color="yellow", linestyle="dashed", label="min ZMP")
+                # if "ref_zmp_min_x" in result_data.dtype.names and "ref_zmp_min_y" in result_data.dtype.names:
+                #     ax.plot(result_data["ref_zmp_min_x"], self.offset(step_list,result_data["ref_zmp_min_y"]),
+                #             color="yellow", linestyle="dashed", label="min ZMP")
                     
-                if "ref_zmp_max_x" in result_data.dtype.names and "ref_zmp_max_y" in result_data.dtype.names:
-                    ax.plot(result_data["ref_zmp_max_x"], self.offset(step_list,result_data["ref_zmp_max_y"]),
-                            color="blue", linestyle="dashed", label="max ZMP")
+                # if "ref_zmp_max_x" in result_data.dtype.names and "ref_zmp_max_y" in result_data.dtype.names:
+                #     ax.plot(result_data["ref_zmp_max_x"], self.offset(step_list,result_data["ref_zmp_max_y"]),
+                #             color="blue", linestyle="dashed", label="max ZMP")
                     
-                ax.plot(result_data["com_pos_x"], self.offset(step_list,result_data["com_pos_y"]),
-                        color="green", label="CoM")
+                # ax.plot(result_data["com_pos_x"], self.offset(step_list,result_data["com_pos_y"]),
+                #         color="green", label="CoM")
                         
-                if plot_capture_point and "capture_point_x" in result_data.dtype.names and "capture_point_y" in result_data.dtype.names:
-                    ax.plot(result_data["capture_point_x"], self.offset(step_list,result_data["capture_point_y"]),
-                            color="orange", label="capture point")
+                # if plot_capture_point and "capture_point_x" in result_data.dtype.names and "capture_point_y" in result_data.dtype.names:
+                #     ax.plot(result_data["capture_point_x"], self.offset(step_list,result_data["capture_point_y"]),
+                #             color="orange", label="capture point")
 
                 # Set labels, etc.
                 ax.set_title("{}-{}".format(method_str, "x-y"))
